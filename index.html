@@ -1,0 +1,1045 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Tables Magiques</title>
+  <meta name="theme-color" content="#7c3aed" />
+  <style>
+    :root{
+      --bg1:#f7f7ff;
+      --bg2:#fff7ed;
+      --ink:#1f2937;
+      --muted:#6b7280;
+      --primary:#7c3aed;
+      --cyan:#06b6d4;
+      --good:#22c55e;
+      --bad:#ef4444;
+      --shadow: 0 12px 26px rgba(31,41,55,.12);
+      --radius: 20px;
+    }
+    *{box-sizing:border-box}
+    html, body{height:100%}
+    body{
+      margin:0;
+      font-family: ui-rounded, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+      color:var(--ink);
+      background:
+        radial-gradient(900px 600px at 20% 10%, rgba(124,58,237,.20), transparent 60%),
+        radial-gradient(900px 600px at 90% 30%, rgba(6,182,212,.18), transparent 60%),
+        linear-gradient(180deg, var(--bg1), var(--bg2));
+      padding: 16px;
+      padding-top: calc(16px + env(safe-area-inset-top));
+      padding-bottom: calc(16px + env(safe-area-inset-bottom));
+      display:flex;
+      justify-content:center;
+      align-items:flex-start;
+    }
+    .app{width:min(740px, 100%); display:grid; gap:14px;}
+    .topbar{
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      padding:14px; border-radius: var(--radius);
+      background: rgba(255,255,255,.65);
+      backdrop-filter: blur(10px);
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(31,41,55,.08);
+    }
+    .brand{display:flex; gap:10px; align-items:center; min-width:0;}
+    .logo{
+      width:40px; height:40px; border-radius:14px; display:grid; place-items:center;
+      background: linear-gradient(135deg, rgba(124,58,237,.95), rgba(6,182,212,.9));
+      color:white; box-shadow: 0 12px 20px rgba(124,58,237,.22);
+      flex:0 0 auto; font-size:20px;
+    }
+    .brand h1{margin:0; font-size:18px; line-height:1.1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+    .brand p{margin:2px 0 0; font-size:12px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+
+    .btn{
+      border:0; cursor:pointer; border-radius: 16px; padding: 12px 14px;
+      font-weight: 900; font-size: 15px;
+      box-shadow: 0 10px 18px rgba(31,41,55,.12);
+      transition: transform .06s ease;
+      user-select:none; -webkit-tap-highlight-color: transparent;
+      background: rgba(255,255,255,.9);
+      border: 1px solid rgba(31,41,55,.10);
+      color: var(--ink);
+    }
+    .btn:active{transform: translateY(1px);}
+    .btn.primary{
+      color:white;
+      border:none;
+      background: linear-gradient(180deg, rgba(124,58,237,.98), rgba(124,58,237,.82));
+    }
+    .btn.danger{
+      background: rgba(239,68,68,.12);
+      color: #991b1b;
+      border: 1px solid rgba(239,68,68,.18);
+      box-shadow:none;
+    }
+    .btn.icon{display:flex; align-items:center; gap:8px;}
+
+    .card{
+      background: rgba(255,255,255,.75);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(31,41,55,.08);
+      border-radius: var(--radius);
+      padding: 14px;
+      box-shadow: var(--shadow);
+    }
+    .settings{display:grid; gap:12px;}
+    .grid2{display:grid; grid-template-columns: 1fr 1fr; gap:10px;}
+    @media (max-width: 560px){ .grid2{grid-template-columns: 1fr;} .topbar{align-items:flex-start} }
+
+    .field label{display:block; font-weight: 900; font-size: 13px; margin-bottom:6px; color: rgba(31,41,55,.85);}
+    select, input[type="number"]{
+      width:100%;
+      border-radius: 16px;
+      border: 1px solid rgba(31,41,55,.12);
+      background: rgba(255,255,255,.95);
+      padding: 14px 12px;
+      font-size: 16px; /* évite le zoom iOS */
+      outline: none;
+    }
+
+    .toggleRow{display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:space-between;}
+    .toggles{display:flex; gap:10px; flex-wrap:wrap;}
+    .toggle{
+      display:flex; align-items:center; gap:10px; padding: 10px 12px;
+      border-radius: 16px; border: 1px solid rgba(31,41,55,.10);
+      background: rgba(255,255,255,.9);
+      user-select:none;
+    }
+    .toggle input{width:18px; height:18px}
+
+    .chips{display:flex; flex-wrap:wrap; gap:8px;}
+    .chip{
+      padding: 10px 12px; border-radius: 999px;
+      border: 1px solid rgba(31,41,55,.10);
+      background: rgba(255,255,255,.9);
+      font-weight: 900; cursor:pointer;
+      user-select:none; -webkit-tap-highlight-color: transparent;
+    }
+    .chip.on{border-color: rgba(124,58,237,.35); background: rgba(124,58,237,.12);}
+
+    .quizTop{
+      display:flex; gap:10px; justify-content:space-between;
+      flex-wrap:wrap; align-items:center;
+    }
+    .pill{
+      padding: 8px 10px; border-radius: 999px;
+      background: rgba(6,182,212,.12);
+      border: 1px solid rgba(6,182,212,.22);
+      font-weight:900; font-size: 13px;
+    }
+    .questionBox{
+      margin-top:10px; text-align:center; padding: 12px;
+      border-radius: var(--radius);
+      background: rgba(255,255,255,.92);
+      border: 1px solid rgba(31,41,55,.08);
+    }
+    .question{font-size: 44px; font-weight: 1000; letter-spacing: .5px; margin: 6px 0 2px;}
+    @media (max-width:560px){ .question{font-size: 40px;} }
+    .helper{font-size: 13px; color: var(--muted); margin: 0;}
+
+    .answerRow{display:flex; gap:10px; margin-top:12px; align-items:stretch;}
+    .answerRow input{flex: 1; font-size: 20px; font-weight: 1000; text-align:center;}
+
+    .feedback{margin-top: 10px; text-align:center; min-height: 28px; font-weight: 1000; font-size: 18px;}
+    .feedback.good{color: var(--good);}
+    .feedback.bad{color: var(--bad);}
+
+    .stats{
+      display:grid; grid-template-columns: repeat(4, 1fr);
+      gap:10px; margin-top: 12px;
+    }
+    @media (max-width:560px){ .stats{grid-template-columns: repeat(2, 1fr);} }
+    .stat{
+      background: rgba(255,255,255,.9);
+      border: 1px solid rgba(31,41,55,.08);
+      border-radius: 18px;
+      padding: 10px 10px;
+      text-align:center;
+    }
+    .stat .n{font-weight:1000; font-size: 20px;}
+    .stat .t{font-size: 12px; color: var(--muted); font-weight: 900;}
+
+    .badgeBox{
+      margin-top:10px;
+      padding:12px;
+      border-radius:18px;
+      border:1px dashed rgba(124,58,237,.35);
+      background: rgba(124,58,237,.10);
+      text-align:center;
+      display:none;
+    }
+    .badgeBox .big{font-size:38px; font-weight:1000; margin:0}
+    .badgeBox .txt{margin:4px 0 0; font-weight:1000}
+
+    .footerNote{
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 12px;
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    button:focus, select:focus, input:focus{
+      outline: 3px solid rgba(124,58,237,.25);
+      outline-offset: 2px;
+    }
+
+    /* Parents modal */
+    .modalBack{
+      position:fixed; inset:0;
+      background: rgba(15,23,42,.38);
+      display:none;
+      align-items:flex-end;
+      justify-content:center;
+      padding: 16px;
+      padding-bottom: calc(16px + env(safe-area-inset-bottom));
+      z-index: 50;
+    }
+    .modal{
+      width:min(760px, 100%);
+      max-height: 85vh;
+      overflow:auto;
+      border-radius: 22px;
+      background: rgba(255,255,255,.92);
+      border:1px solid rgba(31,41,55,.12);
+      box-shadow: 0 26px 60px rgba(0,0,0,.20);
+      padding: 14px;
+    }
+    .modalTop{
+      display:flex; justify-content:space-between; align-items:center; gap:10px;
+      position: sticky; top: 0;
+      background: rgba(255,255,255,.92);
+      backdrop-filter: blur(6px);
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(31,41,55,.10);
+      margin-bottom: 10px;
+    }
+    .modal h2{margin:0; font-size:16px;}
+    .sectionTitle{margin:14px 0 8px; font-weight:1000;}
+    table{width:100%; border-collapse: collapse; font-size: 13px;}
+    th, td{padding:10px 8px; border-bottom:1px solid rgba(31,41,55,.10); text-align:left;}
+    th{font-size:12px; color: var(--muted);}
+    .small{font-size:12px; color: var(--muted);}
+    .kpiRow{display:grid; grid-template-columns: repeat(3, 1fr); gap:10px;}
+    @media (max-width:560px){ .kpiRow{grid-template-columns: 1fr;} }
+    .kpi{
+      background: rgba(255,255,255,.95);
+      border:1px solid rgba(31,41,55,.10);
+      border-radius: 18px;
+      padding: 10px;
+    }
+    .kpi .n{font-weight:1000; font-size:18px;}
+    .kpi .t{font-size:12px; color: var(--muted); font-weight:900;}
+  </style>
+</head>
+
+<body>
+  <div class="app">
+
+    <div class="topbar">
+      <div class="brand">
+        <div class="logo">✨</div>
+        <div style="min-width:0">
+          <h1>Tables Magiques</h1>
+          <p>10 questions • ×1 à ×10 • sans doublons 😄</p>
+        </div>
+      </div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end;">
+        <button class="btn icon" id="parentsBtn" title="Page Parents">👨‍👩‍👧 Parents</button>
+        <button class="btn icon" id="resetBtn" title="Remettre à zéro">🧹 Reset</button>
+      </div>
+    </div>
+
+    <div class="card settings">
+      <div class="grid2">
+        <div class="field">
+          <label>Mode</label>
+          <select id="modeSel">
+            <option value="mix" selected>🎲 Mélange (10 questions différentes)</option>
+            <option value="choose">🎯 Une table (×1 à ×10, une seule fois)</option>
+            <option value="mistakes">🧠 Revoir mes erreurs (sans doublons)</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Chrono</label>
+          <select id="timerSel">
+            <option value="off" selected>⏳ Non</option>
+            <option value="15">⏱️ 15 secondes</option>
+            <option value="10">⏱️ 10 secondes</option>
+            <option value="5">⏱️ 5 secondes</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="toggleRow">
+        <div class="toggles">
+          <div class="toggle" title="Lire la question à voix haute">
+            <input id="ttsToggle" type="checkbox" />
+            <div><b>🔊 Lecture</b><br><span style="color:var(--muted); font-size:12px">Lire la question</span></div>
+          </div>
+
+          <div class="toggle" title="Répondre en parlant (si supporté)">
+            <input id="sttToggle" type="checkbox" />
+            <div><b>🎙️ Réponse</b><br><span style="color:var(--muted); font-size:12px">Dire le résultat</span></div>
+          </div>
+
+          <div class="toggle" title="Vibration (mobile)">
+            <input id="hapticToggle" type="checkbox" checked />
+            <div><b>📳 Vibration</b><br><span style="color:var(--muted); font-size:12px">Feedback</span></div>
+          </div>
+        </div>
+
+        <button class="btn primary icon" id="startBtn">🚀 Démarrer</button>
+      </div>
+
+      <div>
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+          <div style="font-weight:1000">Tables (pour “Une table”)</div>
+          <div style="color:var(--muted); font-size:12px">Si plusieurs cochées, l’app en choisit une au hasard.</div>
+        </div>
+        <div class="chips" id="tablesGrid" style="margin-top:8px"></div>
+      </div>
+    </div>
+
+    <div class="card" id="quizCard">
+      <div class="quizTop">
+        <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center">
+          <span class="pill">📘 <span id="qIndex">0</span>/<span id="qTotal">0</span></span>
+          <span class="pill">⏱️ <span id="timeLeft">—</span></span>
+          <span class="pill">⭐ Série : <span id="streak">0</span></span>
+          <span class="pill" id="sessionInfo">—</span>
+        </div>
+
+        <div style="display:flex; gap:8px; flex-wrap:wrap">
+          <button class="btn icon" id="skipBtn">➡️ Passer</button>
+          <button class="btn danger icon" id="stopBtn">🛑 Stop</button>
+        </div>
+      </div>
+
+      <div class="questionBox">
+        <p class="helper" id="helperText">Réponds vite et amuse-toi !</p>
+        <div class="question" id="question">—</div>
+      </div>
+
+      <div class="answerRow">
+        <input id="answer" type="number" inputmode="numeric" pattern="[0-9]*" placeholder="Ta réponse" />
+        <button class="btn primary icon" id="okBtn">✅ OK</button>
+        <button class="btn icon" id="micBtn" style="display:none" title="Répondre en parlant">🎙️</button>
+      </div>
+
+      <div class="feedback" id="feedback"></div>
+
+      <div class="badgeBox" id="badgeBox">
+        <p class="big">🏅</p>
+        <p class="txt">Badge gagné : 10/10 !</p>
+        <p class="small" style="margin:6px 0 0;">Tu es trop fort(e) 😄</p>
+      </div>
+
+      <div class="stats">
+        <div class="stat"><div class="n" id="good">0</div><div class="t">Justes ✅</div></div>
+        <div class="stat"><div class="n" id="bad">0</div><div class="t">Fausses ❌</div></div>
+        <div class="stat"><div class="n" id="accuracy">0%</div><div class="t">Réussite 🎯</div></div>
+        <div class="stat"><div class="n" id="mistakesCount">0</div><div class="t">Erreurs 🧠</div></div>
+      </div>
+
+      <div class="footerNote">
+        <div>Entrée = OK. (Mobile : clavier auto)</div>
+        <div id="voiceSupport" style="font-weight:900"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Parents modal -->
+  <div class="modalBack" id="modalBack" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-label="Page Parents">
+      <div class="modalTop">
+        <h2>👨‍👩‍👧 Page Parents</h2>
+        <button class="btn icon" id="closeParentsBtn">✖️ Fermer</button>
+      </div>
+
+      <div class="kpiRow">
+        <div class="kpi">
+          <div class="n" id="kpiBadges">0</div>
+          <div class="t">Badges 🏅 (10/10)</div>
+        </div>
+        <div class="kpi">
+          <div class="n" id="kpiTotalSessions">0</div>
+          <div class="t">Sessions</div>
+        </div>
+        <div class="kpi">
+          <div class="n" id="kpiGlobalAccuracy">0%</div>
+          <div class="t">Réussite globale</div>
+        </div>
+      </div>
+
+      <div class="sectionTitle">Progrès par table (sur le premier nombre)</div>
+      <table>
+        <thead>
+          <tr><th>Table</th><th>Réussite</th><th>Bon / Total</th></tr>
+        </thead>
+        <tbody id="tablesStatsBody"></tbody>
+      </table>
+
+      <div class="sectionTitle">Dernières sessions</div>
+      <table>
+        <thead>
+          <tr><th>Date</th><th>Mode</th><th>Infos</th><th>Score</th></tr>
+        </thead>
+        <tbody id="sessionsBody"></tbody>
+      </table>
+
+      <div class="small" style="margin-top:10px;">
+        Astuce : le mode “Une table” fait exactement ×1 à ×10 (sans doublons), idéal pour apprendre.
+      </div>
+    </div>
+  </div>
+
+<script>
+  // ------------------------------
+  // Constantes (fixes)
+  // ------------------------------
+  const MAX_MUL = 10;          // ×1 à ×10
+  const QUESTION_COUNT = 10;   // 10 questions
+
+  // ------------------------------
+  // Storage
+  // ------------------------------
+  const STORE_KEY = "tablesMagiques_v3";
+  const defaultStore = {
+    totalGood: 0,
+    totalBad: 0,
+    mistakes: {}, // key "ax b" stored as "a x b" but we use "a×b" key format "aXb" below
+    badges: 0,    // number of 10/10 sessions
+    tables: {},   // per table stats: { [a]: {good, total} }
+    sessions: []  // last sessions: [{ts, mode, info, good, total, badge}]
+  };
+
+  const loadStore = () => { try { return JSON.parse(localStorage.getItem(STORE_KEY)) || null; } catch { return null; } };
+  const saveStore = (s) => localStorage.setItem(STORE_KEY, JSON.stringify(s));
+  let store = loadStore() || structuredClone(defaultStore);
+
+  // ------------------------------
+  // UI refs
+  // ------------------------------
+  const modeSel = document.getElementById("modeSel");
+  const timerSel = document.getElementById("timerSel");
+  const ttsToggle = document.getElementById("ttsToggle");
+  const sttToggle = document.getElementById("sttToggle");
+  const hapticToggle = document.getElementById("hapticToggle");
+
+  const startBtn = document.getElementById("startBtn");
+  const resetBtn = document.getElementById("resetBtn");
+  const parentsBtn = document.getElementById("parentsBtn");
+
+  const tablesGrid = document.getElementById("tablesGrid");
+
+  const qIndexEl = document.getElementById("qIndex");
+  const qTotalEl = document.getElementById("qTotal");
+  const timeLeftEl = document.getElementById("timeLeft");
+  const questionEl = document.getElementById("question");
+  const helperText = document.getElementById("helperText");
+  const sessionInfo = document.getElementById("sessionInfo");
+
+  const answerEl = document.getElementById("answer");
+  const okBtn = document.getElementById("okBtn");
+  const skipBtn = document.getElementById("skipBtn");
+  const stopBtn = document.getElementById("stopBtn");
+
+  const feedbackEl = document.getElementById("feedback");
+  const badgeBox = document.getElementById("badgeBox");
+
+  const goodEl = document.getElementById("good");
+  const badEl = document.getElementById("bad");
+  const streakEl = document.getElementById("streak");
+  const accuracyEl = document.getElementById("accuracy");
+  const mistakesCountEl = document.getElementById("mistakesCount");
+  const voiceSupportEl = document.getElementById("voiceSupport");
+
+  const micBtn = document.getElementById("micBtn");
+
+  // Parents modal refs
+  const modalBack = document.getElementById("modalBack");
+  const closeParentsBtn = document.getElementById("closeParentsBtn");
+  const kpiBadges = document.getElementById("kpiBadges");
+  const kpiTotalSessions = document.getElementById("kpiTotalSessions");
+  const kpiGlobalAccuracy = document.getElementById("kpiGlobalAccuracy");
+  const tablesStatsBody = document.getElementById("tablesStatsBody");
+  const sessionsBody = document.getElementById("sessionsBody");
+
+  // ------------------------------
+  // Utils
+  // ------------------------------
+  function randInt(min, max){ return Math.floor(Math.random()*(max-min+1))+min; }
+  function shuffle(arr){
+    for (let i=arr.length-1; i>0; i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+  function pairKey(a,b){ return `${a}x${b}`; } // internal key for uniqueness + mistakes
+  function fmtDate(ts){
+    const d = new Date(ts);
+    return d.toLocaleDateString("fr-FR", { day:"2-digit", month:"2-digit" }) + " " +
+           d.toLocaleTimeString("fr-FR", { hour:"2-digit", minute:"2-digit" });
+  }
+
+  // ------------------------------
+  // Tables selection chips (×1..×10)
+  // ------------------------------
+  const selectedTables = new Set([2,3,4,5]); // défaut
+  function renderTables(){
+    tablesGrid.innerHTML = "";
+    for (let t=1; t<=MAX_MUL; t++){
+      const chip = document.createElement("div");
+      chip.className = "chip" + (selectedTables.has(t) ? " on" : "");
+      chip.textContent = "×" + t;
+      chip.onclick = () => {
+        if (selectedTables.has(t)) selectedTables.delete(t); else selectedTables.add(t);
+        renderTables();
+        tinyHaptic();
+      };
+      tablesGrid.appendChild(chip);
+    }
+  }
+  renderTables();
+
+  // ------------------------------
+  // Voice: Text-to-Speech (TTS)
+  // ------------------------------
+  function canTTS(){ return "speechSynthesis" in window; }
+  function speak(text){
+    if (!ttsToggle.checked) return;
+    if (!canTTS()) return;
+    try{
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = "fr-FR";
+      u.rate = 0.95;
+      u.pitch = 1.05;
+      window.speechSynthesis.speak(u);
+    }catch{}
+  }
+
+  // ------------------------------
+  // Voice: Speech-to-Text (STT)
+  // ------------------------------
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  let rec = null;
+  function canSTT(){ return !!SpeechRecognition; }
+  function setupRecognition(){
+    if (!canSTT()) return null;
+    const r = new SpeechRecognition();
+    r.lang = "fr-FR";
+    r.interimResults = false;
+    r.maxAlternatives = 1;
+    return r;
+  }
+  rec = setupRecognition();
+
+  function parseSpokenNumber(frText){
+    if (!frText) return null;
+    const s = frText.toLowerCase().trim();
+    const m = s.match(/\d+/);
+    if (m) return parseInt(m[0], 10);
+
+    const map = {
+      "zéro":0,"zero":0,"un":1,"une":1,"deux":2,"trois":3,"quatre":4,"cinq":5,"six":6,"sept":7,"huit":8,"neuf":9,"dix":10,
+      "onze":11,"douze":12,"treize":13,"quatorze":14,"quinze":15,"seize":16,
+      "vingt":20,"trente":30,"quarante":40,"cinquante":50,"soixante":60,
+      "quatre-vingt":80,"quatre-vingts":80,"cent":100
+    };
+
+    const tokens = s.replace(/-/g," ").split(/\s+/).filter(Boolean);
+    let current = 0;
+    let seen = false;
+
+    for (const tok of tokens){
+      if (tok === "et") continue;
+      if (map[tok] == null) continue;
+      seen = true;
+      current += map[tok];
+    }
+    return seen ? current : null;
+  }
+
+  function startListening(){
+    if (!sttToggle.checked) return;
+    if (!rec) return;
+    micBtn.disabled = true;
+    micBtn.textContent = "…";
+    try{
+      rec.onresult = (e) => {
+        const said = e.results?.[0]?.[0]?.transcript || "";
+        const num = parseSpokenNumber(said);
+        if (num != null){
+          answerEl.value = String(num);
+          okBtn.click();
+        } else {
+          showFeedback("Je n'ai pas compris 😅", "bad");
+        }
+      };
+      rec.onerror = () => showFeedback("Micro indisponible", "bad");
+      rec.onend = () => {
+        micBtn.disabled = false;
+        micBtn.textContent = "🎙️";
+      };
+      rec.start();
+    }catch{
+      micBtn.disabled = false;
+      micBtn.textContent = "🎙️";
+    }
+  }
+
+  // ------------------------------
+  // Haptics
+  // ------------------------------
+  function haptic(ms){
+    if (!hapticToggle.checked) return;
+    if (navigator.vibrate) navigator.vibrate(ms);
+  }
+  function tinyHaptic(){ haptic(10); }
+  function goodHaptic(){ haptic(25); }
+  function badHaptic(){ haptic([30, 40, 30]); }
+
+  // ------------------------------
+  // Mistakes + counts
+  // ------------------------------
+  function mistakesKeys(){ return Object.keys(store.mistakes || {}); }
+  function updateMistakesCount(){ mistakesCountEl.textContent = mistakesKeys().length; }
+
+  function addMistake(a,b){
+    const key = pairKey(a,b);
+    store.mistakes[key] = (store.mistakes[key] || 0) + 1;
+  }
+  function softenMistake(a,b){
+    const key = pairKey(a,b);
+    if (store.mistakes[key]){
+      store.mistakes[key] -= 1;
+      if (store.mistakes[key] <= 0) delete store.mistakes[key];
+    }
+  }
+
+  // ------------------------------
+  // Per-table stats
+  // ------------------------------
+  function ensureTableStat(a){
+    store.tables ||= {};
+    store.tables[a] ||= {good:0, total:0};
+    return store.tables[a];
+  }
+  function recordTableResult(a, isGood){
+    const t = ensureTableStat(a);
+    t.total += 1;
+    if (isGood) t.good += 1;
+  }
+
+  // ------------------------------
+  // Quiz state
+  // ------------------------------
+  let quiz = null; // {items, i, good, bad, streak, timerSec, tLeft, tId, sessionMeta}
+  function updateStats(){
+    if (!quiz){
+      goodEl.textContent = "0";
+      badEl.textContent = "0";
+      streakEl.textContent = "0";
+      accuracyEl.textContent = "0%";
+      return;
+    }
+    goodEl.textContent = quiz.good;
+    badEl.textContent = quiz.bad;
+    streakEl.textContent = quiz.streak;
+    const total = quiz.good + quiz.bad;
+    const acc = total ? Math.round((quiz.good/total)*100) : 0;
+    accuracyEl.textContent = acc + "%";
+  }
+
+  function showFeedback(text, kind){
+    feedbackEl.textContent = text;
+    feedbackEl.className = "feedback " + (kind || "");
+  }
+
+  function clearTimer(){
+    if (quiz?.tId) clearInterval(quiz.tId);
+    if (quiz) quiz.tId = null;
+  }
+
+  function setupTimer(){
+    clearTimer();
+    if (!quiz) return;
+
+    if (quiz.timerSec == null){
+      timeLeftEl.textContent = "—";
+      return;
+    }
+    quiz.tLeft = quiz.timerSec;
+    timeLeftEl.textContent = quiz.tLeft + "s";
+    quiz.tId = setInterval(() => {
+      quiz.tLeft -= 1;
+      timeLeftEl.textContent = quiz.tLeft + "s";
+      if (quiz.tLeft <= 0){
+        clearTimer();
+        grade(null, true);
+      }
+    }, 1000);
+  }
+
+  // ------------------------------
+  // Question generation (NO DUPLICATES)
+  // ------------------------------
+  function makeQuestions(){
+    const mode = modeSel.value;
+
+    // 1) "Une table" : EXACTEMENT une fois 1..10
+    if (mode === "choose"){
+      const allowed = [...selectedTables];
+      const chosen = allowed.length ? allowed[randInt(0, allowed.length-1)] : 2;
+
+      const bs = shuffle(Array.from({length: MAX_MUL}, (_,i)=>i+1)); // [1..10] mélangé
+      const items = bs.map(b => ({a: chosen, b}));
+
+      return { items, info: `Table ×${chosen}` };
+    }
+
+    // 2) "Mélange" : 10 paires uniques
+    if (mode === "mix"){
+      const used = new Set();
+      const items = [];
+      while (items.length < QUESTION_COUNT){
+        const a = randInt(1, MAX_MUL);
+        const b = randInt(1, MAX_MUL);
+        const k = pairKey(a,b);
+        if (used.has(k)) continue;
+        used.add(k);
+        items.push({a,b});
+      }
+      return { items, info: `Mélange` };
+    }
+
+    // 3) "Erreurs" : prendre d'abord des erreurs uniques (jusqu'à 10), sinon compléter avec uniques random
+    if (mode === "mistakes"){
+      const keys = mistakesKeys();
+
+      // tri par "poids" (nombre d'erreurs)
+      const sorted = keys
+        .map(k => ({k, w: store.mistakes[k] || 1}))
+        .sort((x,y)=> y.w - x.w);
+
+      const used = new Set();
+      const items = [];
+
+      for (const obj of sorted){
+        if (items.length >= QUESTION_COUNT) break;
+        const [aS,bS] = obj.k.split("x");
+        const a = parseInt(aS,10), b = parseInt(bS,10);
+        if (a < 1 || a > MAX_MUL || b < 1 || b > MAX_MUL) continue;
+        const k = pairKey(a,b);
+        if (used.has(k)) continue;
+        used.add(k);
+        items.push({a,b});
+      }
+
+      while (items.length < QUESTION_COUNT){
+        const a = randInt(1, MAX_MUL);
+        const b = randInt(1, MAX_MUL);
+        const k = pairKey(a,b);
+        if (used.has(k)) continue;
+        used.add(k);
+        items.push({a,b});
+      }
+
+      return { items, info: `Erreurs` };
+    }
+
+    // fallback
+    return { items: [], info: "—" };
+  }
+
+  function renderQuestion(){
+    const it = quiz.items[quiz.i];
+    qIndexEl.textContent = (quiz.i + 1);
+    qTotalEl.textContent = quiz.items.length;
+    questionEl.textContent = `${it.a} × ${it.b} = ?`;
+    helperText.textContent = sttToggle.checked ? "Tu peux parler ou écrire !" : "Écris ta réponse 😄";
+    answerEl.value = "";
+    showFeedback("", "");
+    badgeBox.style.display = "none";
+    updateStats();
+    setupTimer();
+
+    speak(`${it.a} fois ${it.b}.`);
+    setTimeout(() => answerEl.focus({preventScroll:true}), 0);
+  }
+
+  function endQuiz(){
+    clearTimer();
+
+    const total = quiz.good + quiz.bad;
+    const acc = total ? Math.round((quiz.good/total)*100) : 0;
+
+    const gotBadge = (quiz.good === QUESTION_COUNT); // 10/10
+
+    // Save badge + session history
+    if (gotBadge){
+      store.badges = (store.badges || 0) + 1;
+      badgeBox.style.display = "block";
+      speak("Bravo ! Badge gagné !");
+    } else {
+      speak("Bravo !");
+    }
+
+    // record session in history (keep last 10)
+    store.sessions ||= [];
+    store.sessions.unshift({
+      ts: Date.now(),
+      mode: quiz.sessionMeta.modeLabel,
+      info: quiz.sessionMeta.info,
+      good: quiz.good,
+      total: QUESTION_COUNT,
+      badge: gotBadge
+    });
+    store.sessions = store.sessions.slice(0, 10);
+
+    saveStore(store);
+
+    questionEl.textContent = "Bravo 🎉";
+    helperText.textContent = gotBadge ? "Tu as gagné un badge 🏅 !" : "Tu peux recommencer quand tu veux !";
+    showFeedback(`Score : ${quiz.good}/${total} (${acc}%)`, "");
+    timeLeftEl.textContent = "—";
+    qIndexEl.textContent = total;
+    qTotalEl.textContent = total;
+
+    quiz = null;
+    updateStats();
+    updateMistakesCount();
+    refreshParentsUI();
+  }
+
+  function grade(value, timeout=false){
+    if (!quiz) return;
+    clearTimer();
+
+    const it = quiz.items[quiz.i];
+    const correct = it.a * it.b;
+    const ok = (value !== null && Number(value) === correct);
+
+    // record per-table stats (table = "a")
+    recordTableResult(it.a, ok);
+
+    if (ok){
+      quiz.good++;
+      quiz.streak++;
+      store.totalGood++;
+      softenMistake(it.a, it.b);
+      showFeedback("✅ Super !", "good");
+      goodHaptic();
+      speak("Bravo !");
+    } else {
+      quiz.bad++;
+      quiz.streak = 0;
+      store.totalBad++;
+      addMistake(it.a, it.b);
+      showFeedback(timeout ? `⏱️ Temps écoulé… c’était ${correct}` : `❌ Oups… c’était ${correct}`, "bad");
+      badHaptic();
+      speak(`C'était ${correct}.`);
+    }
+
+    saveStore(store);
+    updateMistakesCount();
+    updateStats();
+
+    setTimeout(() => {
+      quiz.i++;
+      if (quiz.i >= quiz.items.length){
+        endQuiz();
+      } else {
+        renderQuestion();
+      }
+    }, 650);
+  }
+
+  function startQuiz(){
+    badgeBox.style.display = "none";
+    micBtn.style.display = sttToggle.checked ? "inline-flex" : "none";
+
+    let note = "";
+    if (ttsToggle.checked && !canTTS()) note = "🔊 Lecture: non supportée";
+    if (sttToggle.checked && !canSTT()) note = note ? (note + " | 🎙️ Réponse: non supportée") : "🎙️ Réponse: non supportée";
+    voiceSupportEl.textContent = note || "";
+
+    const timerVal = timerSel.value === "off" ? null : parseInt(timerSel.value, 10);
+
+    const gen = makeQuestions();
+    const modeLabel =
+      modeSel.value === "mix" ? "Mélange" :
+      modeSel.value === "choose" ? "Une table" :
+      "Erreurs";
+
+    quiz = {
+      items: gen.items,
+      i: 0,
+      good: 0,
+      bad: 0,
+      streak: 0,
+      timerSec: timerVal,
+      tLeft: null,
+      tId: null,
+      sessionMeta: { modeLabel, info: gen.info }
+    };
+
+    sessionInfo.textContent = gen.info;
+    tinyHaptic();
+    renderQuestion();
+  }
+
+  function stopQuiz(){
+    clearTimer();
+    quiz = null;
+    qIndexEl.textContent = "0";
+    qTotalEl.textContent = "0";
+    timeLeftEl.textContent = "—";
+    questionEl.textContent = "—";
+    helperText.textContent = "Clique sur Démarrer";
+    sessionInfo.textContent = "—";
+    answerEl.value = "";
+    showFeedback("", "");
+    badgeBox.style.display = "none";
+    updateStats();
+  }
+
+  // ------------------------------
+  // Parents UI
+  // ------------------------------
+  function refreshParentsUI(){
+    // KPIs
+    const badges = store.badges || 0;
+    const sessions = store.sessions || [];
+    const totalSessions = sessions.length ? (store._totalSessionsEver || null) : null;
+
+    // Use sessions length as displayed "sessions", but also compute a running count simply:
+    // We'll store an ever counter when we end a session, if you want exact.
+    // To keep it simple and reliable, we compute from history displayed (10) + totals of answers:
+    // We'll show "total de réponses" implicitly via global accuracy.
+    const totalAnswers = (store.totalGood || 0) + (store.totalBad || 0);
+    const globalAcc = totalAnswers ? Math.round((store.totalGood / totalAnswers) * 100) : 0;
+
+    kpiBadges.textContent = badges;
+    kpiTotalSessions.textContent = (store.sessionsEver || 0);
+    kpiGlobalAccuracy.textContent = globalAcc + "%";
+
+    // table stats 1..10
+    tablesStatsBody.innerHTML = "";
+    for (let a=1; a<=MAX_MUL; a++){
+      const t = (store.tables && store.tables[a]) ? store.tables[a] : {good:0, total:0};
+      const pct = t.total ? Math.round((t.good / t.total) * 100) : 0;
+
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>×${a}</td>
+        <td>${t.total ? (pct + "%") : "—"}</td>
+        <td>${t.good} / ${t.total}</td>
+      `;
+      tablesStatsBody.appendChild(tr);
+    }
+
+    // sessions history
+    sessionsBody.innerHTML = "";
+    const list = store.sessions || [];
+    if (list.length === 0){
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td colspan="4" class="small">Aucune session enregistrée pour l’instant.</td>`;
+      sessionsBody.appendChild(tr);
+    } else {
+      for (const s of list){
+        const tr = document.createElement("tr");
+        const badge = s.badge ? "🏅" : "";
+        tr.innerHTML = `
+          <td>${fmtDate(s.ts)}</td>
+          <td>${s.mode}</td>
+          <td>${s.info} ${badge}</td>
+          <td>${s.good}/${s.total}</td>
+        `;
+        sessionsBody.appendChild(tr);
+      }
+    }
+  }
+
+  function openParents(){
+    refreshParentsUI();
+    modalBack.style.display = "flex";
+    modalBack.setAttribute("aria-hidden", "false");
+  }
+  function closeParents(){
+    modalBack.style.display = "none";
+    modalBack.setAttribute("aria-hidden", "true");
+  }
+
+  // ------------------------------
+  // Init store counters (ever sessions)
+  // ------------------------------
+  store.sessionsEver ||= 0;
+
+  // Hook endQuiz to increment sessionsEver
+  const _endQuizOriginal = endQuiz;
+  endQuiz = function(){
+    // increment sessionsEver before saving in original
+    store.sessionsEver = (store.sessionsEver || 0) + 1;
+    _endQuizOriginal();
+  };
+
+  // ------------------------------
+  // Events
+  // ------------------------------
+  startBtn.addEventListener("click", startQuiz);
+  okBtn.addEventListener("click", () => {
+    if (!quiz) return;
+    const v = answerEl.value.trim();
+    if (!v) return;
+    grade(v, false);
+  });
+  skipBtn.addEventListener("click", () => { if (quiz) grade(null, false); });
+  stopBtn.addEventListener("click", stopQuiz);
+  answerEl.addEventListener("keydown", (e) => { if (e.key === "Enter") okBtn.click(); });
+  micBtn.addEventListener("click", startListening);
+
+  sttToggle.addEventListener("change", () => {
+    micBtn.style.display = sttToggle.checked ? "inline-flex" : "none";
+    tinyHaptic();
+  });
+
+  resetBtn.addEventListener("click", () => {
+    store = structuredClone(defaultStore);
+    store.sessionsEver = 0;
+    saveStore(store);
+    updateMistakesCount();
+    stopQuiz();
+    alert("Tout est remis à zéro ✅");
+  });
+
+  parentsBtn.addEventListener("click", openParents);
+  closeParentsBtn.addEventListener("click", closeParents);
+  modalBack.addEventListener("click", (e) => { if (e.target === modalBack) closeParents(); });
+
+  // ------------------------------
+  // Initial
+  // ------------------------------
+  stopQuiz();
+  updateMistakesCount();
+
+  // Voice availability hint
+  const supports = [];
+  if (canTTS()) supports.push("🔊");
+  if (canSTT()) supports.push("🎙️");
+  voiceSupportEl.textContent = supports.length ? ("Voix dispo : " + supports.join(" ")) : "";
+  refreshParentsUI();
+</script>
+</body>
+</html>
